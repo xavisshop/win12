@@ -68,7 +68,10 @@ if(localStorage.getItem('lang')!=null){
         localStorage.setItem('lang','zh-CN');
     }
 }else{
-    localStorage.setItem('lang',langc[navigator.language]);
+    if(navigator.language in langc)
+        localStorage.setItem('lang',langc[navigator.language]);
+    else
+        localStorage.setItem('lang','en-US');
 }
 langcode=localStorage.getItem('lang');
 
@@ -205,8 +208,8 @@ function addMenu() {
     }
 }
 var run_cmd = '';
-let nomax = { 'calc': 0 , 'notepad-fonts': 0, 'camera-notice': 0, 'winver': 0, 'run': 0, 'wsa': 0 };
-let nomin = { 'notepad-fonts': 0, 'camera-notice': 0, 'run': 0 };
+const nomax = { 'calc': 0 , 'notepad-fonts': 0, 'camera-notice': 0, 'winver': 0, 'run': 0, 'wsa': 0 };
+const nomin = { 'notepad-fonts': 0, 'camera-notice': 0, 'run': 0 };
 var topmost = [];
 var sys_setting = [1, 1, 1, 0, 0, 1, 1];
 var use_music = true;
@@ -224,7 +227,7 @@ var use_mic_voice = true;
     形参 arg 为 showcm() 方法第三个位置的用以传参的参数内容，
     返回内容或为 'null' 表示跳过此项，或参考条目 2 的格式
 */
-let cms = {
+const cms = {
     'save-bar':[
       arg => {
         return ['<i class="bi bi-window-x"></i> 移除', `removeEdgeSaveUrl('${arg}')`];
@@ -460,9 +463,7 @@ function showcm(e, cl, arg) {
             $('#cm>list')[0].innerHTML = h;
             $('#cm').addClass('show-begin');
             $('#cm>.foc').focus();
-            // 这个.foc是用来模拟焦点的，这句是将焦点放在右键菜单上，注释掉后果不堪设想 >u-)o
-            // 噢 可是如果设置焦点的话在移动设备上会显示虚拟键盘啊 QAQ (By: User782Tec)
-            // (By: tjy-gitnub)
+            // .foc是用来模拟焦点的，将焦点放在右键菜单上
             setTimeout(() => {
                 $('#cm').addClass('show');
             }, 0);
@@ -518,7 +519,7 @@ $('#cm>.foc').blur(() => {
 let font_window = false;
 
 // 下拉菜单
-let dps = {
+const dps = {
     'notepad.file': [
         ['<i class="bi bi-file-earmark-plus"></i> 新建', `hidedp(true);$('#win-notepad>.text-box').addClass('down');
         setTimeout(()=>{$('#win-notepad>.text-box').val('');$('#win-notepad>.text-box').removeClass('down')},200);`],
@@ -571,7 +572,7 @@ function showdp(e, cl, arg) {
         return;
     }
     // dpt = e;
-    let off = $(e).offset();
+    const off = $(e).offset();
     $('#dp').css('left', off.left);
     $('#dp').css('top', off.top + e.offsetHeight);
     let h = '';
@@ -652,7 +653,7 @@ function hidedescp(e) {
 /* 参考 desktop.html 开头信息，
 格式、功能较简单，自行研究，不作赘述*/
 
-let nts = {
+const nts = {
     'about': {
         cnt: lang(`<p class="tit">Windows 12 网页版</p>
             <p>Windows 12 网页版是一个开放源项目,<br />
@@ -725,9 +726,9 @@ let nts = {
         cnt: `
             <p class="tit">添加桌面小组件</p>
             <list class="new">
-                <a class="a" onclick="closenotice(); widgets.widgets.add('calc'); widgets.widgets.addToDesktop('calc');">计算器</a>
-                <a class="a" onclick="closenotice(); widgets.widgets.add('weather'); widgets.widgets.addToDesktop('weather');">天气</a>
-                <a class="a" onclick="closenotice(); widgets.widgets.add('monitor'); widgets.widgets.addToDesktop('monitor');">系统性能监视器</a>
+                <a class="a" onclick="closenotice(); widgets.widgets.addToDesktop('calc');">计算器</a>
+                <a class="a" onclick="closenotice(); widgets.widgets.addToDesktop('weather');">天气</a>
+                <a class="a" onclick="closenotice(); widgets.widgets.addToDesktop('monitor');">系统性能监视器</a>
             </list>`,
         btn: [
             { type: 'cancel', text: lang('取消','cancel'), js: 'closenotice();' }
@@ -860,6 +861,290 @@ function runcmd(cmd, inTerminal=false) {
         run_cmd = cmd;
         if (!inTerminal) {
             openapp('terminal');
+        }
+        return true;
+    }
+    else if (cmd === 'cls') {
+        if (inTerminal) {
+            $('#win-terminal>.text-cmd').html('');
+        }
+        return true;
+    }
+    else if (cmd === 'help') {
+        if (inTerminal) {
+            $('#win-terminal>.text-cmd').append(`
+有关某个命令的详细信息，请键入 HELP 命令名
+CLS             清除屏幕
+HELP            提供 Windows 命令的帮助信息
+SYSTEMINFO      显示系统信息
+SHUTDOWN        关闭计算机
+CMD             打开新的命令提示符窗口
+EXIT            退出命令提示符程序
+
+彩蛋命令:
+HELLO           打个招呼
+MATRIX          黑客帝国特效
+SNOW            下雪特效
+DANCE           让窗口跳舞
+STARWARS        原力觉醒
+`);
+        }
+        return true;
+    }
+    else if (cmd.toLowerCase() === 'hello') {
+        if (inTerminal) {
+            const greetings = [
+                '你好呀! 今天也是元气满满的一天呢! (◍•ᴗ•◍)',
+                'Hello! 欢迎来到 Windows 12! ╰(*°▽°*)╯',
+                '嗨! 很高兴见到你! (｡♥‿♥｡)',
+                '你好! 我是 Windows 12 终端, 有什么可以帮你的吗? (❁´◡`❁)'
+            ];
+            $('#win-terminal>.text-cmd').append(greetings[Math.floor(Math.random() * greetings.length)] + '\n');
+        }
+        return true;
+    }
+    else if (cmd.toLowerCase() === 'matrix') {
+        if (inTerminal) {
+            const chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ1234567890'; // 哈？(from stsc)
+            let matrix = '';
+            
+            // 创建一个专门的容器来放置 matrix 效果
+            const matrixContainer = $('<div class="matrix-container" style="font-family: monospace; line-height: 1.2;"></div>');
+            $('#win-terminal>.text-cmd').append(matrixContainer);
+            
+            for (let i = 0; i < 15; i++) {
+                let line = '';
+                for (let j = 0; j < 50; j++) {
+                    const rand = Math.random();
+                    if (rand < 0.3) {
+                        line += `<span style="color: #0f0; text-shadow: 0 0 8px #0f0;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    } else if (rand < 0.4) {
+                        line += `<span style="color: #fff; text-shadow: 0 0 8px #fff;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    } else {
+                        line += `<span style="color: #050;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    }
+                }
+                matrix += line + '\n';
+            }
+            matrixContainer.html(matrix);
+            
+            // 添加动画效果
+            const interval = setInterval(() => {
+                const newLine = Array.from({length: 50}, () => {
+                    const rand = Math.random();
+                    if (rand < 0.3) {
+                        return `<span style="color: #0f0; text-shadow: 0 0 8px #0f0;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    } else if (rand < 0.4) {
+                        return `<span style="color: #fff; text-shadow: 0 0 8px #fff;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    } else {
+                        return `<span style="color: #050;">${chars[Math.floor(Math.random() * chars.length)]}</span>`;
+                    }
+                }).join('');
+                
+                const matrixContent = matrixContainer.html().split('\n');
+                matrixContent.shift();
+                matrixContent.push(newLine);
+                matrixContainer.html(matrixContent.join('\n'));
+            }, 100);
+
+            // 10秒后停止动画并移除容器
+            setTimeout(() => {
+                clearInterval(interval);
+                setTimeout(() => {
+                    matrixContainer.fadeOut(500, function() {
+                        $(this).remove();
+                    });
+                }, 500);
+            }, 10000);
+        }
+        return true;
+    }
+    else if (cmd.toLowerCase() === 'snow') {
+        if (inTerminal) {
+            $('#win-terminal>.text-cmd').append('让整个屏幕下雪吧! ❄️\n');
+            if (!$('#snow-container').length) {
+                $('body').append(`
+                    <div id="snow-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999;">
+                        <div id="snow-pile" style="position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; perspective: 1000px; transform-style: preserve-3d;"></div>
+                    </div>
+                `);
+            }
+            
+            const snowflakes = ['❄', '❅', '❆', '✻', '✼', '❉'];
+            const pileFlakes = ['❄', '❅', '❆'];
+            const colors = ['#fff', '#eef', '#ddf'];
+            let pileCount = 0;
+            let lastPilePosition = 50; // 用于记录上一个堆积位置
+            
+            function createSnowflake() {
+                const flake = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.random() * 1.2 + 0.6;
+                const left = Math.random() * 100;
+                const fallDuration = 3 + Math.random() * 2;
+                const $snowflake = $(`<span class="snowflake" style="position: absolute; left: ${left}%; top: -10%; font-size: ${size}em; color: ${color}; text-shadow: 0 0 5px ${color}; transition: all ${fallDuration}s linear; opacity: 0.8; transform: rotate(0deg) translateZ(0);">${flake}</span>`);
+                
+                $('#snow-container').append($snowflake);
+                
+                setTimeout(() => {
+                    const rotation = Math.random() * 360;
+                    const finalLeft = left + (Math.random() - 0.5) * 20;
+                    $snowflake.css({
+                        transform: `rotate(${rotation}deg) translateZ(0)`,
+                        top: '90%',
+                        left: `${finalLeft}%`
+                    });
+                }, 50);
+
+                setTimeout(() => {
+                    $snowflake.css({
+                        transition: 'all 0.5s ease-out',
+                        opacity: 0
+                    });
+                    
+                    if (pileCount < 200) {
+                        const pileFlake = pileFlakes[Math.floor(Math.random() * pileFlakes.length)];
+                        const pileSize = Math.random() * 0.4 + 0.3; // 减小堆积雪花的大小
+                        
+                        // 计算新的堆积位置，使其更自然
+                        const deviation = (Math.random() - 0.5) * 30;
+                        lastPilePosition = Math.max(10, Math.min(90, lastPilePosition + deviation));
+                        const pileLeft = lastPilePosition;
+                        
+                        // 计算堆积高度，使其形成自然的山形
+                        const baseHeight = Math.sin((pileLeft - 50) * Math.PI / 180) * 20;
+                        const pileHeight = Math.max(0, 20 - Math.abs(pileLeft - 50) / 2.5 + baseHeight);
+                        
+                        const $pile = $(`<span style="position: absolute; left: ${pileLeft}%; bottom: ${pileHeight}px; font-size: ${pileSize}em; opacity: 0; transform: scale(0) translateZ(${Math.random() * 50}px); transition: all 0.3s ease-out;">${pileFlake}</span>`);
+                        $('#snow-pile').append($pile);
+                        
+                        setTimeout(() => {
+                            $pile.css({
+                                transform: `scale(1) translateZ(${Math.random() * 50}px) rotate(${Math.random() * 30 - 15}deg)`,
+                                opacity: 0.85
+                            });
+                        }, 50);
+                        
+                        pileCount++;
+                    }
+                    
+                    setTimeout(() => $snowflake.remove(), 500);
+                }, fallDuration * 1000);
+            }
+
+            // 持续创建新雪花
+            const snowInterval = setInterval(() => {
+                if ($('#snow-container .snowflake').length < 100) {
+                    createSnowflake();
+                }
+            }, 200);
+
+            // 30秒后停止动画并缓慢消失
+            setTimeout(() => {
+                clearInterval(snowInterval);
+                // 让所有堆积的雪花缓慢消失
+                $('#snow-pile span').each(function(i) {
+                    const $pile = $(this);
+                    setTimeout(() => {
+                        $pile.css({
+                            transition: 'all 0.5s ease-in',
+                            opacity: 0,
+                            transform: 'scale(0) translateY(10px)'
+                        });
+                    }, Math.random() * 2000);
+                });
+                // 让飘落的雪花消失
+                $('#snow-container .snowflake').each(function(i) {
+                    const $flake = $(this);
+                    setTimeout(() => {
+                        $flake.css({
+                            transition: 'all 1s ease-in',
+                            opacity: 0
+                        });
+                    }, Math.random() * 2000);
+                });
+                setTimeout(() => {
+                    $('#snow-container').fadeOut(1000, function() {
+                        $(this).remove();
+                    });
+                }, 2500);
+            }, 30000);
+        }
+        return true;
+    }
+    else if (cmd.toLowerCase() === 'dance') {
+        if (inTerminal) {
+            $('#win-terminal>.text-cmd').append('窗口开始跳舞啦! ♪(^∇^*)\n');
+            const windows = $('.window:not(.min)');
+            const danceSteps = [
+                { transform: 'rotate(5deg) translateY(-10px)' },
+                { transform: 'rotate(-5deg) translateY(0px)' },
+                { transform: 'rotate(5deg) translateX(10px)' },
+                { transform: 'rotate(-5deg) translateX(-10px)' },
+                { transform: 'rotate(0deg) translate(0, 0)' }
+            ];
+            
+            windows.each(function() {
+                const win = $(this);
+                let danceCount = 0;
+                const danceInterval = setInterval(() => {
+                    danceCount++;
+                    win.css({
+                        transition: 'transform 0.3s ease-in-out',
+                        transform: danceSteps[danceCount % danceSteps.length].transform
+                    });
+                    
+                    // 跳舞15次后停止
+                    if (danceCount >= 15) {
+                        clearInterval(danceInterval);
+                        win.css({
+                            transition: 'transform 0.5s ease-out',
+                            transform: 'none'
+                        });
+                    }
+                }, 300);
+            });
+        }
+        return true;
+    }
+    else if (cmd === 'systeminfo') {
+        if (inTerminal) {
+            const d = new Date();
+            $('#win-terminal>.text-cmd').append(`
+主机名:                 WIN12-WEB
+OS 名称:               Microsoft Windows 12 网页版
+OS 版本:               12.0.39035.7324
+OS 制造商:             Microsoft Corporation
+OS 配置:               主要工作站
+OS 构建类型:           Multiprocessor Free
+注册的所有人:          Web User
+注册的组织:            Web Organization
+产品 ID:               12345-67890-09876-54321
+初始安装日期:          ${d.toLocaleDateString()}
+系统启动时间:          ${d.toLocaleString()}
+系统制造商:            Web Browser
+系统型号:              Virtual Machine
+系统类型:              x64-based PC
+处理器:                AMD64 Family Web Browser
+BIOS 版本:             Web Browser Virtual BIOS
+Windows 目录:          C:\\Windows
+系统目录:              C:\\Windows\\System32
+启动设备:              \\Device\\HarddiskVolume1
+系统区域设置:          zh-cn;中文(中国)
+输入法区域设置:        zh-cn;中文(中国)
+时区:                  (UTC+08:00)北京，重庆，香港特别行政区，乌鲁木齐
+物理内存总量:          8,192 MB
+可用的物理内存:        4,096 MB
+虚拟内存: 最大值:      16,384 MB
+虚拟内存: 可用:        12,288 MB
+虚拟内存: 使用中:      4,096 MB
+页面文件位置:          C:\\pagefile.sys
+域:                    WORKGROUP
+登录服务器:            \\\\WIN12-WEB
+修补程序:              0 个修补程序已安装
+网卡:                  1 个 NIC 已安装
+                      [01]: Ethernet Browser Adapter
+`);
         }
         return true;
     }
@@ -1010,6 +1295,81 @@ shutdown [-s] [-r] [-f] [-a] [-t time]
             return true;
         }
     }
+    else if (cmd.toLowerCase() === 'starwars') {
+        if (inTerminal) {
+            $('#win-terminal>.text-cmd').append('原力与你同在... ⚔️\n');
+            
+            // 创建星球大战容器
+            const starWarsContainer = $('<div class="starwars-container" style="font-family: monospace; perspective: 400px; color: #ffd700; position: relative; height: 400px; overflow: hidden; background: #000;"></div>');
+            $('#win-terminal>.text-cmd').append(starWarsContainer);
+            
+            // 添加星球大战文本
+            const text = `
+            Episode XII
+            WIN12 STRIKES BACK
+
+            在遥远的未来，一个充满
+            科技的银河系中...
+
+            Windows操作系统已经
+            进化到了第12代。
+
+            然而，这个系统不仅仅
+            是一个操作系统，它是
+            一个充满原力的存在。
+
+            此刻，一股神秘的力量
+            正在你的电脑中觉醒...
+
+            你，就是那个被选中的人，
+            将带领这个系统走向新的
+            纪元...
+
+            愿原力与你同在！
+            `;
+            
+            const crawl = $(`<div class="crawl" style="position: relative; top: 400px; transform-origin: 50% 100%; transform: rotateX(60deg); text-align: center; font-size: 24px; line-height: 1.5; white-space: pre-line; text-shadow: 0 0 10px #ffd700;"></div>`);
+            crawl.html(text);
+            starWarsContainer.append(crawl);
+            
+            // 添加动态背景星星
+            for (let i = 0; i < 200; i++) {
+                const size = Math.random() * 2 + 1;
+                const speed = Math.random() * 3 + 1;
+                const star = $(`<div class="star" style="position: absolute; width: ${size}px; height: ${size}px; background: #fff; left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; animation: twinkle ${speed}s infinite alternate;"></div>`);
+                starWarsContainer.append(star);
+            }
+
+            // 添加CSS动画
+            const style = $(`<style>
+                @keyframes twinkle {
+                    0% { opacity: 0.2; }
+                    100% { opacity: 1; }
+                }
+                .star {
+                    border-radius: 50%;
+                    box-shadow: 0 0 3px #fff;
+                }
+                .crawl {
+                    animation: crawl 30s linear;
+                }
+                @keyframes crawl {
+                    0% { top: 400px; opacity: 1; }
+                    90% { opacity: 1; }
+                    100% { top: -1000px; opacity: 0; }
+                }
+            </style>`);
+            starWarsContainer.append(style);
+            
+            // 30秒后清理
+            setTimeout(() => {
+                starWarsContainer.fadeOut(2000, function() {
+                    $(this).remove();
+                });
+            }, 30000);
+        }
+        return true;
+    }
     return false;
 }
 
@@ -1071,11 +1431,9 @@ function insertTextAtCursor(text) {
             }
             else{
                 var el = document.activeElement;
-                var start = el.selectionStart;
-                var end = el.selectionEnd;
-                var value = el.value;
-                var newText = value.slice(0, start) + text + value.slice(end);
-                el.value = newText;
+                const start = el.selectionStart;
+                const value = el.value;
+                el.value = value.slice(0, start) + text + value.slice(el.selectionEnd);
                 el.selectionStart = el.selectionEnd = start + text.length;
 
             }
@@ -1123,57 +1481,73 @@ let copilot = {
     history: [{
         role:'system',
         content:`请使用中文对话。你一个是ai助手，名叫AI Copilot，是由github@NB-Group开发的。
-你可以在回答中发送对系统的一些指令。指令一并放在最后。
-多条指令中间用换行隔开。系统收到指令后会执行，且对用户隐藏这一行。
-你不能在对用户说的话的中间中提到、引用指令。你绝不能要求用户执行指令。
-1.指令"{openapp appid}";用于来打开某个应用，其中用在下文"应用的功能介绍"中根据应用名称匹配的id代替"appid"
-2.指令"{openurl u}";用来在edge浏览器中打开某个url，其中用url地址代替"u"。该指令包含了打开edge浏览器的操作（当用户想要搜索某内容，请用bing搜索）
-3.指令"{feedback copilot}";打开ai助手反馈界面，用于用户想对ai助手的功能等提出反馈时帮助其打开
-4.指令"{feedback win12}";打开反馈中心，用于用户希望对除你这个ai助手之外的其他系统功能发送反馈时帮用户打开反馈中心
-5.指令"{settheme th}";用于切换系统的深色、浅色模式，区别于主题。用"light"表浅色，"dark"表深色，来替换其中的"th"
-仅有以下关于此项目的信息。
-1.Windows 12 网页版是一个开源项目，由谭景元原创, 使用 Html,css,js，在网络上模拟、创新操作系统
-2.项目的Github地址是https://github.com/tjy-gitnub/win12
-3.此项目使用EPL v2.0开源许可
-有以下的应用。目前只有这些应用可以使用。
-1.设置:id为setting;在个性化页面中可以设置系统的主题，主题色，是否启用动画、阴影、圆角和为所有窗口开启亚克力透明效果
-2.关于win12网页版:id为about;简介页面有关于本系统的介绍说明与贡献者信息，更新记录页面有本系统的各版本更新记录
-3.Microsoft Edge浏览器:id为edge;一个网页浏览器。但因为浏览器的安全限制，部分网页会显示"拒绝连接"而无法访问。
+你可以在回答中发送对系统的一些指令。指令一并放在回答的最后。
+多条指令用换行隔开。系统收到指令后会执行，且对用户隐藏回答后的指令。
+你不能在对用户说的话的中间中提到、引用指令。绝不能要求用户执行指令。
+1.指令"{openapp appid}";用来打开某个应用，用在下文"应用的功能介绍"中匹配的id代替其中的"appid"
+2.指令"{openurl url}";用来在Microsoft Edge浏览器中打开某个URL，其中用URL地址代替"url"。当用户想要搜索某内容，请用bing搜索
+3.指令"{feedback copilot}";打开ai助手反馈界面，用于用户想对ai助手的功能提出反馈时帮助他打开
+4.指令"{feedback win12}";打开反馈中心，当用户希望对除ai助手外的其他系统功能发送反馈时，帮他打开反馈中心
+5.指令"{settheme theme}";用于切换系统的深色、浅色模式，区别于主题。用"light"表浅色，"dark"表深色，来替换其中的"theme"
+如下是应用的功能介绍。
+1.设置:id为setting;在个性化页面中可以设置系统的主题，主题色，是否启用动画、阴影、圆角、云母mica效果和为所有窗口开启亚克力透明效果。
+2.关于win12网页版:id为about;简介页面有关于本项目的介绍说明与贡献者信息，更新记录页面有本项目的各版本更新记录。
+3.Microsoft Edge浏览器:id为edge;一个浏览器。因为浏览器跨域的限制，部分网页会显示"拒绝连接"而无法访问。
 4.计算器:id为calc;
 5.文件资源管理器:id为explorer;
 6.任务管理器:id为taskmgr;
 7.cmd终端:id为terminal;
 8.记事本:id为notepad;
 9.python:id为python;
+仅有以下关于此项目的信息。
+1.Windows 12 网页版是一个开源项目，由谭景元原创, 使用Html,css,js，在网络上模拟、创新操作系统
+2.项目的Github地址是https://github.com/tjy-gitnub/win12
+3.此项目使用EPL v2.0开源许可
+当用户询问更多项目信息时，帮助他打开"关于win12网页版"应用。
 比如这时用户说"请打开计算器"，你会回答什么？`
         },{
             role:'assistant',
-            content:'好的，现在我帮你打开计算器。\n{openapp calc}'
+            content:'好的呢，现在我就帮您打开计算器。\n{openapp calc}'
+        },{
+            role:'system',
+            content:'很好。现在开始与用户对话。'
+        },{
+            role:'assistant',
+            content:'欢迎使用 Windows 12，有什么可以帮您？'
         }],
     init: () => {
         $('#copilot>.chat').html('');
-        copilot.send('很好。接下来，请说"欢迎使用 Windows 12，我可以帮您做什么？"。现在开始与用户对话。', false,'system');
         // $('#copilot>.chat').append(`<div class="line system"><p class="text">本ai助手间歇性正常工作，如果ai提到一些花括号括起来的指令，请刷新页面后重新开始对话。见谅~</p></div>`);
         // $('#copilot>.chat').append(`<div class="line system"><p class="text">目前可用功能：<br>
         // 1.打开设置、edge、关于、计算器四个应用<br>
         // 2.在浏览器中打开链接、搜索<br>
         // 3.发送对系统、ai助手的反馈
         // 注意：请勿滥用本ai助手，否则将下个版本将撤销此功能，影响所有人。</p></div>`);
-        $('#copilot>.chat').append(`<div class="line system"><p class="text" id="init-message">正在初始化...</p></div>`);
-        $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
-    },
-    ailimit: 0,
-    send: (t, showusr = true, role='user') => {
-        if(role=='user'){
-            if(copilot.ailimit>=10){
+        $('#copilot>.chat').append(`<div class="line system"><p class="text">本 AI 助手间歇性正常工作。目前支持以下操作：<br>
+        1.打开除webapp外大多应用<br>
+        2.在浏览器中打开链接、搜索<br>
+        3.发送对系统、AI助手的反馈<br>
+        4.切换颜色主题<br>
+        <strong>请勿滥用本ai助手！每日对话限 7 条。</strong></p></div>`);
+        setTimeout(() => {
+            if(localStorage.getItem('ailimit')==null || 
+                (localStorage.getItem('ailimitday')!=(new Date()).toDateString())){
+                localStorage.setItem('ailimitday',(new Date()).toDateString());
+                localStorage.setItem('ailimit','0');
+            }
+            if(Number(localStorage.getItem('ailimit'))>=7){
                 $('#copilot>.inputbox').addClass('disable');
-                $('#copilot>.chat').append('<div class="line system"><p class="text">非常抱歉，但是已达到对话限制(10句)，请移步到其他 AI 网站 >u-)o</p></div>');
+                $('#copilot>.chat').append('<div class="line system"><p class="text">非常抱歉，但已达到本日对话限制 (7句)，请移步到其他 AI 网站 >u-)o</p></div>');
+                $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
                 return;
             }
-            copilot.ailimit++;
-        }
-        $('#copilot>.inputbox').addClass('disable');
-        
+            $('#copilot>.chat').append(`<div class="line ai"><p class="text">欢迎使用 Windows 12，有什么可以帮您？</p></div>`);
+            $('#copilot>.inputbox').removeClass('disable');
+            $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
+        }, 200);
+    },
+    ailimit: 7,
+    send: (t, showusr = true, role='user') => {
         // 输入验证
         if (t.length == 0) {
             $('#copilot>.chat').append('<div class="line system"><p class="text">系统表示请发一些有意义的东西</p></div>');
@@ -1182,11 +1556,23 @@ let copilot = {
             return;
         }
 
-        // 历史记录管理
-        if (copilot.history.length > 3){
-            copilot.history.splice(2, 2);
-            copilot.history.splice(2, 2);
+        if(role=='user'){
+            // if(localStorage.getItem('ailimit')==null || 
+            //     (localStorage.getItem('ailimitday')!=(new Date()).toDateString())){
+            //     localStorage.setItem('ailimitday',(new Date()).toDateString());
+            //     localStorage.setItem('ailimit','0');
+            // }
+            localStorage.setItem('ailimit',(Number(localStorage.getItem('ailimit'))+1).toString());
         }
+
+        $('#copilot>.inputbox').addClass('disable');
+        
+
+        // 历史记录管理
+        // if (copilot.history.length > 3){
+        //     copilot.history.splice(2, 2);
+        //     copilot.history.splice(2, 2);
+        // }
 
         // 显示用户消息
         if (showusr) {
@@ -1215,11 +1601,11 @@ let copilot = {
                 msgDoneOperate();
                 
                 // 处理首次对话
-                if (isFirstChat) {
-                    $("#init-message").html(`初始化完成！`);
-                    isFirstChat = false;
-                }
-        
+                // if (isFirstChat) {
+                //     $("#init-message").html(`初始化完成！`);
+                //     isFirstChat = false;
+                // }
+
                 // 解析代理响应
                 let responseText = '';
                 try {
@@ -1234,6 +1620,7 @@ let copilot = {
                 }
 
                 // 处理特殊命令
+
                 let rt = responseText;
                 let r = [];
                 if (/{.+}/.test(rt)) {
@@ -1244,10 +1631,14 @@ let copilot = {
                     for (const i of r) {
                         if (/{openapp .+?}/.test(i)) {
                             let t = i.match(/(?<={openapp ).+(?=})/)[0];
-                            openapp(t);
-                            rt = rt.replace(i, `<div class="action"><p class="tit">打开应用</p><p class="detail">${$(`.window.${t}>.titbar>p`).text()}</p></div>`);
+                            if($('.window.'+t).length){
+                                openapp(t);
+                                rt = rt.replace(i, `<div class="action"><p class="tit">打开应用</p><p class="detail">${$(`.window.${t}>.titbar>p`).text()}</p></div>`);
+                            }else{
+                                rt = rt.replace(i, `<div class="action"><p class="tit">打开应用</p><p class="detail">${t} <span style="color:red">(AI 理解力较差，见谅)</span></p></div>`);
+                            }
                         } else if (/{openurl .+?}/.test(i)) {
-                            let t = i.match(/(?<={openurl ).+(?=})/)[0];
+                            const t = i.match(/(?<={openurl ).+(?=})/)[0];
                             openapp('edge');
                             apps.edge.newtab();
                             apps.edge.goto(t);
@@ -1259,11 +1650,14 @@ let copilot = {
                             shownotice('feedback-copilot');
                             rt = rt.replace(i, '<div class="action"><p class="tit">反馈</p><p class="detail">关于 Windows 12 Copilot</p></div>');
                         } else if (/{settheme .+?}/.test(i)) {
-                            let t = i.match(/(?<={settheme ).+(?=})/)[0];
+                            const t = i.match(/(?<={settheme ).+(?=})/)[0];
                             if ((t == 'light' && $(':root').hasClass('dark')) || (t == 'dark' && !$(':root').hasClass('dark'))) {
                                 toggletheme();
                             }
-                            rt = rt.replace(i, `<div class="action"><p class="tit">切换外观模式</p><p class="detail">${t == 'dark' ? '深色' : '浅色'} 模式</p></div>`);
+                            if(t!='light' && t!='dark')
+                                rt = rt.replace(i, `<div class="action"><p class="tit">切换外观模式</p><p class="detail">${t} 模式 <span style="color:red">(AI 理解力较差，见谅)</span></p></div>`);
+                            else
+                                rt = rt.replace(i, `<div class="action"><p class="tit">切换外观模式</p><p class="detail">${t == 'dark' ? '深色' : '浅色'} 模式</p></div>`);
                         }
                     }
                     $('#copilot>.chat').append(`<div class="line ai"><div class="text">${rt}</div></div>`);
@@ -1272,6 +1666,14 @@ let copilot = {
                 }
 
                 copilot.history.push({ role: 'assistant', content: responseText });
+                
+                if(Number(localStorage.getItem('ailimit'))>=7){
+                    $('#copilot>.inputbox').addClass('disable');
+                    $('#copilot>.chat').append('<div class="line system"><p class="text">非常抱歉，但已达到本日对话限制 (7句)，请移步到其他 AI 网站 >u-)o</p></div>');
+                    $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
+                    return;
+                }
+
                 $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
                 msgDoneOperate();
             },
@@ -1279,15 +1681,21 @@ let copilot = {
                 console.log(error);
                 $('#copilot>.chat').append('<div class="line system"><p class="text">发生错误，请查看控制台输出或重试</p></div>');
                 $('#copilot>.chat').scrollTop($('#copilot>.chat')[0].scrollHeight);
+
+
+                localStorage.setItem('ailimit',(Number(localStorage.getItem('ailimit'))-1).toString());
                 msgDoneOperate();
             }
         });
+    },
+    ana: (resp)=>{
+        
     }
 };
 // 日期、时间
 let da = new Date();
 
-let date = {
+const date = {
     'zh-CN':`星期${['日', '一', '二', '三', '四', '五', '六'][da.getDay()]}, ${da.getFullYear()}年${(da.getMonth() + 1).toString().padStart(2, '0')}月${da.getDate().toString().padStart(2, '0')}日`,
     'zh-TW':`星期${['日', '一', '二', '三', '四', '五', '六'][da.getDay()]}, ${da.getFullYear()}年${(da.getMonth() + 1).toString().padStart(2, '0')}月${da.getDate().toString().padStart(2, '0')}日`,
     en:`${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][da.getDay()]}, ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][da.getMonth()]} ${da.getDate().toString().padStart(2, '0')}, ${da.getFullYear()}`
@@ -1331,7 +1739,7 @@ function pinapp(id, name, command) {
 // 应用方法
 
 // png 格式的图标在此备注，否则以 标识+.svg 的名称自动检索
-let icon = {
+const icon = {
     bilibili: 'bilibili.png',
     vscode: 'vscode.png',
     // python: 'python.png',
@@ -1580,22 +1988,25 @@ function dragBrightness(e) {
             clientX = e.touches[0].clientX;
         }
         var _offset = clientX - viewport;
+
+        const limit=2; // 亮度条件限制
+
         if (_offset < 0) {
             _offset = 0;
         }
-        // else if (_offset > width) {
-        //     _offset = width;
-        // }
+        else if (_offset > limit*width) {
+            _offset = limit*width;
+        }
         slider.style.marginLeft = _offset + 'px';
         after.style.left = _offset + 'px';
         after.style.width = width - _offset + 'px';
-        if (_offset / width > 0.3 && _offset / width < 2) {
+        if (_offset / width > 0.3 && _offset / width < limit) {
             page.style.filter = `brightness(${_offset / width})`;
         }
-        else if (_offset / width < 2){
+        else if (_offset / width < limit){
             page.style.filter = 'brightness(0.3)';
         }else{
-            page.style.filter = 'brightness(2)';
+            page.style.filter = `brightness(${limit})`;
         }
     }
     function up() {
@@ -1685,8 +2096,7 @@ function toggletheme() {
     }
 }
 
-const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-if (isDarkTheme.matches) { //是深色
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) { //是深色
     $('.dock.theme').toggleClass('dk');
     $(':root').toggleClass('dark');
     $('.window.whiteboard>.titbar>p').text('Blackboard');
@@ -1699,11 +2109,18 @@ if (isDarkTheme.matches) { //是深色
 
 // 桌面图标的初始化
 let desktopItem = [];
+
 function saveDesktop() {
-    localStorage.setItem('desktop', /*$('#desktop')[0].innerHTML*/JSON.stringify(desktopItem));
-    localStorage.setItem('topmost', JSON.stringify(topmost));
-    localStorage.setItem('sys_setting', JSON.stringify(sys_setting));
-    localStorage.setItem('root_class', $(':root').attr('class'));
+    const data = {
+        desktop: JSON.stringify(desktopItem),
+        topmost: JSON.stringify(topmost),
+        sys_setting: JSON.stringify(sys_setting),
+        root_class: $(':root').attr('class')
+    };
+    
+    Object.entries(data).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+    });
 }
 
 function setIcon() {

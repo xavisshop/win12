@@ -215,10 +215,15 @@ toggletheme() 切换主题
 		</div>
 		<list class="langselect new">
 			<span class="text" style="font-size: 22px;"><i class="bi bi-globe2"></i></span>
-			<a class="a def" onclick="setData('lang',langc[navigator.language]);window.location.href='';">Default language of the browser</a>
-			<a class="a zh-CN" onclick="setData('lang','zh-CN');window.location.href='';">简体中文</a>
-			<a class="a zh-TW" onclick="setData('lang','zh-TW');window.location.href='';">繁體中文</a>
-			<a class="a en" onclick="setData('lang','en');window.location.href='';">English</a>
+			<a class="a def" onclick="
+				if(navigator.language in langc)
+					localStorage.setItem('lang',langc[navigator.language]);
+				else
+					localStorage.setItem('lang','en-US');
+				window.location.href='';">Default language of the browser</a>
+			<a class="a zh-CN" onclick="localStorage.setItem('lang','zh-CN');window.location.href='';">简体中文</a>
+			<a class="a zh-TW" onclick="localStorage.setItem('lang','zh-TW');window.location.href='';">繁體中文</a>
+			<a class="a en" onclick="localStorage.setItem('lang','en');window.location.href='';">English</a>
 		</list>
 		<a class="power" onclick="$(this).addClass('show')">
 			<!-- <i class="bi bi-translate" onclick="
@@ -291,6 +296,10 @@ toggletheme() 切换主题
 				<a oncontextmenu="return showcm(event, 'smlapp', ['notepad', '记事本'])" onclick="openapp('notepad');hide_startmenu();">
 					<img src="icon/notepad.svg">
 					<p data-i18n="notepad.name">记事本</p>
+				</a>
+				<a oncontextmenu="return showcm(event, 'smlapp', ['copilot', 'Windows 12 Copilot'])" onclick="openapp('copilot');hide_startmenu()">
+					<img src="icon/copilot.svg">
+					<p>Windows 12 Copilot</p>
 				</a>
 				<a oncontextmenu="return showcm(event, 'smlapp', ['edge', 'Microsoft Edge'])" onclick="openapp('edge');hide_startmenu();">
 					<img src="icon/edge.svg">
@@ -527,7 +536,7 @@ toggletheme() 切换主题
 			<div class="content">
 				<div class="template">
 					<div class="calc">
-						<div class="wg calc">
+						<div class="wg calc template">
 							<div class="titbar">
 								<a win12_title="更多" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" class="a more notip" onclick="$('.wg.calc>.titbar>.menu').toggleClass('show')"><i class="bi bi-three-dots"></i></a>
 								<div class="menu">
@@ -535,7 +544,7 @@ toggletheme() 切换主题
 										<img src="icon/calc.svg">
 									</a>
 									<a class="a move" win12_title="移动" onmouseenter="showdescp(event)" onclick=" hidedescp(event); if (!edit_mode) { editMode(); }" onmouseleave="hidedescp(event)"><i class="bi bi-arrows-move"></i></a>
-									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="hidedescp(event); widgets.widgets.addToDesktop('calc');" onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
+									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="hidedescp(event); widgets.widgets.remove('calc'); widgets.widgets.addToDesktop('calc');" onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
 									<a class="a delete" win12_title="删除" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="hidedescp(event); $('.wg.calc>.titbar>.menu').removeClass('show'); widgets.widgets.remove('calc');"><i class="bi bi-trash"></i></a>
 								</div>
 							</div>
@@ -601,13 +610,13 @@ toggletheme() 切换主题
 						</div>
 					</div>
 					<div class="weather">
-						<div class="wg weather">
+						<div class="wg weather template">
 							<div class="titbar">
 								<a win12_title="更多" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" class="a more notip" onclick="$('.wg.weather>.titbar>.menu').toggleClass('show')"><i class="bi bi-three-dots"></i></a>
 								<div class="menu">
 									<a class="a move" win12_title="移动" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="hidedescp(event); if (!edit_mode) { editMode() }; "><i class="bi bi-arrows-move"></i></a>
-									<a class="a addtotb" win12_title="添加到任务栏" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="hidedescp(event); widgets.widgets.addToToolbar('weather'); "><i class="bi bi-menu-app"></i></a>
-									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="hidedescp(event); widgets.widgets.addToDesktop('weather'); " onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
+									<a class="a addtotb" win12_title="添加到任务栏" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="hidedescp(event); widgets.widgets.remove('weather'); widgets.widgets.addToToolbar('weather'); "><i class="bi bi-menu-app"></i></a>
+									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="hidedescp(event); widgets.widgets.remove('weather'); widgets.widgets.addToDesktop('weather'); " onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
 									<a class="a delete" win12_title="删除" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="hidedescp(event); $('.wg.weather>.titbar>.menu').removeClass('show'); widgets.widgets.remove('weather'); "><i class="bi bi-trash"></i></a>
 								</div>
 							</div>
@@ -621,7 +630,7 @@ toggletheme() 切换主题
 						</div>
 					</div>
 					<div class="monitor">
-						<div class="wg monitor">
+						<div class="wg monitor template">
 							<div class="titbar">
 								<a win12_title="更多" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" class="a more notip" onclick="$('.wg.monitor>.titbar>.menu').toggleClass('show')"><i class="bi bi-three-dots"></i></a>
 								<div class="menu">
@@ -630,8 +639,8 @@ toggletheme() 切换主题
 									</a>
 									<a class="a chose" win12_title="切换监视器类型" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="showdescp(event); shownotice('widgets.monitor'); "><i class="bi bi-arrow-left-right"></i></a>
 									<a class="a move" win12_title="移动" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="showdescp(event); if (!edit_mode) { editMode(); } "><i class="bi bi-arrows-move"></i></a>
-									<a class="a addtotb" win12_title="添加到任务栏" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="showdescp(event); widgets.widgets.addToToolbar('monitor'); "><i class="bi bi-menu-app"></i></a>
-									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="showdescp(event); widgets.widgets.addToDesktop('monitor'); " onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
+									<a class="a addtotb" win12_title="添加到任务栏" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="showdescp(event); widgets.widgets.remove('monitor'); widgets.widgets.addToToolbar('monitor'); "><i class="bi bi-menu-app"></i></a>
+									<a class="a addtodt" win12_title="添加到桌面" onmouseenter="showdescp(event)" onclick="showdescp(event); widgets.widgets.remove('monitor'); widgets.widgets.addToDesktop('monitor'); " onmouseleave="hidedescp(event)"><i class="bi bi-box-arrow-in-right"></i></a>
 									<a class="a delete" win12_title="删除" onmouseenter="showdescp(event)" onmouseleave="hidedescp(event)" onclick="showdescp(event); $('.wg.monitor>.titbar>.menu').removeClass('show'); widgets.widgets.remove('monitor'); "><i class="bi bi-trash"></i></a>
 								</div>
 							</div>
@@ -702,7 +711,7 @@ toggletheme() 切换主题
 			AI Copilot 震撼回归，无地域限制，遥遥领先于微软</p>
 		<div class="chat">
 			<a class="a btn button" onclick="copilot.init()" style="display: inline-block;margin-top: 10px;" data-i18n="copilot.start">开始对话</a>
-			<p style="margin-top: 10px;" data-i18n="copilot.p">使用前请先点击右上 "i" 查看使用注意事项</p>
+			<p style="margin-top: 10px;" data-i18n="copilot.p">使用前请先点击右上 "<i class="bi bi-info-circle"></i>" 查看使用注意事项</p>
 		</div>
 		<div class="inputbox disable">
 			<input type="text" class="input" onkeydown="if(event.keyCode==13){copilot.send($(this).val());$(this).val('');this.blur()}">
@@ -1863,6 +1872,17 @@ toggletheme() 切换主题
 			<div class="cnt update">
 				<h1 class="tit" data-i18n="about.update.name"><span></span>更新记录</h1>
 				<div style="margin-left: 20px;">
+					<details><summary><span>v10.0.3</span> 终端彩蛋命令和系统工具</summary><p>
+						&emsp;&emsp;-添加新的终端命令：cls、help、hello、matrix、snow、dance、systeminfo 和 starwars<br>
+						&emsp;&emsp;-增加互动和趣味彩蛋效果，如黑客帝国代码雨、下雪、窗口跳舞和星球大战文字滚动<br>
+						&emsp;&emsp;-添加系统信息显示和基础终端实用工具<br>
+						&emsp;&emsp;-增强终端用户体验，添加趣味和实用命令<br>
+					</p></details>
+					<details><summary><span>v10.0.2</span> 细节优化和修复</summary><p>
+						&emsp;&emsp;-(更新来自 @tjy-gitnub)<br>
+						&emsp;&emsp;-Copilot 每日对话限制<br>
+						&emsp;&emsp;-细节优化和修复<br>
+					</p></details>
 					<details><summary><span>v10.0.1</span> 繁體中文語言支持</summary><p>
 						&emsp;&emsp;-(更新来自 @tjy-gitnub)<br>
 						&emsp;&emsp;-添加繁中語言支持<br>
@@ -2208,6 +2228,24 @@ toggletheme() 切换主题
 		</div>
 		<div class="content" id="win-bilibili">
 			<!-- <iframe src="https://bilibili.com/" frameborder="0" style="width: 100%; height: 100%;" loading="lazy"></iframe> -->
+		</div>
+	</div>
+	
+	<div class="window copilot">
+		<div class="resize-bar"></div>
+		<div class="titbar">
+			<img src="icon/copilot.svg" class="icon">
+			<p>Windows 12 Copilot</p>
+			<div>
+				<a class="a wbtg red" onclick="hidewin('copilot')"><i class="bi bi-x-lg"></i></a>
+				<a class="a wbtg max" onclick="maxwin('copilot')"><i class="bi bi-app"></i></a>
+				<a class="a wbtg" onclick="minwin('copilot')"><i class="bi bi-dash-lg"></i></a>
+			</div>
+		</div>
+		<div class="loadback">
+			<img src="icon/copilot.svg" class="icon">
+		</div>
+		<div class="content" id="win-copilot">
 		</div>
 	</div>
 	<div class="window wsa">
